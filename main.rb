@@ -2,34 +2,31 @@ require_relative 'deck.rb'
 require_relative 'card.rb'
 require_relative 'gamer.rb'
 require_relative 'printer.rb'
+require_relative 'console.rb'
 
 class Main
   include Printer
 
   attr_reader :gamer,
               :dealer,
-              :bet
+              :bet,
+              :interface
 
   attr_accessor :check,
                 :deck
 
   def initialize
     @gamer = Gamer.new
-    @dealer = Gamer.new
+    @dealer = Gamer.new(name: 'Dealer')
     @deck = Deck.new
     @bet = 10
     @check = 0
+    @interface = Console.new
   end
 
   def start
-    get_name
+    gamer.name = interface.get_name
     new_hand
-  end
-
-  def get_name
-    puts 'What is your name?'
-    gamer.name = gets.chomp.capitalize
-    gamer.name = 'Mister X' if gamer.name == ''
   end
 
   def show_main_menu
@@ -91,10 +88,10 @@ class Main
 
   def new_hand
     refresh_deck
-    show_players_bank
+    interface.show_players_bank(gamer.name, gamer.bank, dealer.bank)
     gamer_result
     dealer_result
-    show_bet
+    interface.show_bet(bet)
     show_gamer_hand
     show_dealer_hand
     gamer_options_menu
@@ -108,27 +105,13 @@ class Main
     self.deck = Deck.new
   end
 
-  def show_players_bank
-    puts '----------------------'
-    puts 'Bank:'
-    puts "#{gamer.name} - #{gamer.bank}"
-    puts "Dealer - #{dealer.bank}"
-    puts '----------------------'
-  end
-
-  def show_bet
-    puts
-    puts "Bet: #{bet}".rjust(15)
-    puts '======================'
-  end
-
   def show_gamer_hand
-    puts "#{gamer.name}:"
+    interface.show_gamer_name(gamer.name)
     gamer.bank -= 10
     if gamer.bank < 0
-      puts "Bank - 0"
+      interface.bank_zero
     else
-      puts "Bank - #{gamer.bank}"
+      interface.show_gamer_bank(gamer.bank)
     end
     2.times { gamer.put deck.get }
     gamer.cards.each do |card|
@@ -138,13 +121,13 @@ class Main
   end
 
   def show_dealer_hand
-    puts 'Dealer:'
+    interface.show_gamer_name(dealer.name)
     dealer.bank -= 10
     2.times { dealer.put deck.get }
     if dealer.bank < 0
-      puts "Bank - 0"
+      interface.bank_zero
     else
-      puts "Bank - #{dealer.bank}"
+      interface.show_gamer_bank(dealer.bank)
     end
     print_dealer_cards
     puts
@@ -152,7 +135,7 @@ class Main
 
   def dealer_result
     return unless dealer.bank <= 0
-    puts 'Dealer lose!'.rjust(50)
+    interface.print_loser(dealer.name)
     gamer.bank = 20
     dealer.bank = 20
     show_main_menu
@@ -160,7 +143,7 @@ class Main
 
   def gamer_result
     return unless gamer.bank <= 0
-    puts "#{gamer.name} lose!".rjust(50)
+    interface.print_loser(gamer.name)
     gamer.bank = 20
     dealer.bank = 20
     show_main_menu
@@ -173,27 +156,22 @@ class Main
     new_hand
   end
 
-  def show_results
-    puts "Dealer - #{dealer.points}".rjust(50)
-    puts "#{gamer.name} - #{gamer.points}".rjust(50)
-  end
-
   def show_cards
     if gamer.points < 21 && dealer.over?
-      puts "#{gamer.name} won!".rjust(50)
-      2.times { gamer.bank += bet }
+      interface.print_winner(gamer.name)
+      dealer.bank = bet * 2
     elsif gamer.over? || dealer.points > gamer.points
-      puts 'Dealer won!'.rjust(50)
-      2.times { dealer.bank += bet }
+      interface.print_winner(dealer.name)
+      dealer.bank = bet * 2
     elsif gamer.points == dealer.points
-      puts 'Equal!'.rjust(50)
+      interface.print_equal
       gamer.bank += bet
       dealer.bank += bet
     else
-      puts "#{gamer.name} won!".rjust(50)
-      2.times { gamer.bank += bet }
+      interface.print_winner(gamer.name)
+      dealer.bank = bet * 2
     end
-    show_results
+    interface.show_results(gamer.name, gamer.points, dealer.points)
     new_hand
   end
 end

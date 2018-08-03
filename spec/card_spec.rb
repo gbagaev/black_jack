@@ -3,7 +3,7 @@ require_relative '../card'
 describe Card do
   describe '#points' do
     it 'returns 3' do
-       card = Card.new('heart', '3')
+      card = Card.new('heart', '3')
       expect(card.points).to eq 3
     end
 
@@ -12,9 +12,9 @@ describe Card do
       expect(card.points).to eq 10
     end
 
-    it 'returns 11' do
+    it 'returns 1' do
       card = Card.new('heart', 'A')
-      expect(card.points).to eq 11
+      expect(card.points).to eq 1
     end
   end
 end

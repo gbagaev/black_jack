@@ -10,7 +10,7 @@ class Deck
   SUITS   = [HEART, DIAMOND, CLUB, SPADE].freeze
   RANKS   = %w[2 3 4 5 6 7 8 9 10 J Q K A].freeze
 
-  attr_reader :deck, :card
+  attr_reader :deck#, :card
 
   def initialize
     @deck = generate
@@ -24,16 +24,10 @@ class Deck
 
   def generate
     deck = []
-    i = 0
-
-    while i < SUITS.size
-      j = 0
-      while j < RANKS.size
-        @card = Card.new(SUITS[i], RANKS[j])
-        j += 1
-        deck << @card
+    SUITS.each do |suit|
+      RANKS.each do |rank|
+        deck << Card.new(suit, rank)
       end
-      i += 1
     end
     deck
   end
