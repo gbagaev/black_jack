@@ -1,11 +1,9 @@
 require_relative 'deck.rb'
 require_relative 'card.rb'
 require_relative 'gamer.rb'
-require_relative 'printer.rb'
 require_relative 'console.rb'
 
 class Main
-  include Printer
 
   attr_reader :gamer,
               :dealer,
@@ -17,7 +15,7 @@ class Main
 
   def initialize
     @gamer = Gamer.new
-    @dealer = Gamer.new(name: 'Dealer')
+    @dealer = Gamer.new('Dealer')
     @deck = Deck.new
     @bet = 10
     @check = 0
@@ -25,12 +23,13 @@ class Main
   end
 
   def start
-    gamer.name = interface.get_name
+    name = interface.get_name
+    gamer.name = name unless name.empty?
     new_hand
   end
 
   def show_main_menu
-    print_main_menu
+    interface.print_main_menu
     main_menu_options
   end
 
@@ -46,7 +45,7 @@ class Main
   end
 
   def gamer_options_menu
-    print_gamer_menu
+    interface.print_gamer_menu
     gamer_options
   end
 
@@ -77,7 +76,7 @@ class Main
   def dealers_turn
     self.check += 1
     if dealer.points >= 17
-      dealer_skip_turn
+      interface.dealer_skip_turn
       gamer_options_menu
     elsif dealer.points < 17
       dealer.put deck.get
@@ -117,7 +116,7 @@ class Main
     gamer.cards.each do |card|
       print "#{card.rank}#{card.suit}"
     end
-    show_gamer_points
+    interface.show_gamer_points(gamer.points)
   end
 
   def show_dealer_hand
@@ -129,23 +128,23 @@ class Main
     else
       interface.show_gamer_bank(dealer.bank)
     end
-    print_dealer_cards
+    interface.print_dealer_cards
     puts
   end
 
   def dealer_result
     return unless dealer.bank <= 0
     interface.print_loser(dealer.name)
-    gamer.bank = 20
-    dealer.bank = 20
+    gamer.bank = 100
+    dealer.bank = 100
     show_main_menu
   end
 
   def gamer_result
     return unless gamer.bank <= 0
     interface.print_loser(gamer.name)
-    gamer.bank = 20
-    dealer.bank = 20
+    gamer.bank = 100
+    dealer.bank = 100
     show_main_menu
   end
 

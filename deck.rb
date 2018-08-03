@@ -10,7 +10,7 @@ class Deck
   SUITS   = [HEART, DIAMOND, CLUB, SPADE].freeze
   RANKS   = %w[2 3 4 5 6 7 8 9 10 J Q K A].freeze
 
-  attr_reader :deck#, :card
+  attr_reader :deck
 
   def initialize
     @deck = generate
